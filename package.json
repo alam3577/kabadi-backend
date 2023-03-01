@@ -1,0 +1,28 @@
+{
+  "name": "kabadi-backend",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000k\u0000a\u0000b\u0000a\u0000d\u0000i\u0000-\u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alam3577/kabadi-backend.git"
+  },
+  "author": "sajjad alam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alam3577/kabadi-backend/issues"
+  },
+  "homepage": "https://github.com/alam3577/kabadi-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
