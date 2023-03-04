@@ -4,7 +4,8 @@
   "description": "��#\u0000 \u0000k\u0000a\u0000b\u0000a\u0000d\u0000i\u0000-\u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start:dev": "nodemon index.js",
+    "start:prod": "set NODE_ENV=production && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,12 +18,27 @@
     "url": "https://github.com/alam3577/kabadi-backend/issues"
   },
   "homepage": "https://github.com/alam3577/kabadi-backend#readme",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2"
-  },
   "devDependencies": {
+    "eslint": "^8.34.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "^2.8.4"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mailtrap": "^3.0.1",
+    "mongodb": "^5.1.0",
+    "mongoose": "^6.10.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.1",
     "nodemon": "^2.0.20"
   }
 }

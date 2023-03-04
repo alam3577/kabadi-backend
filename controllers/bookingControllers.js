@@ -1,3 +1,1 @@
-exports.createBooking = (req, res)=> {
-    return res.json({"message": "success"})
-}
+exports.createBooking = (req, res) => res.json({ message: 'success' });
