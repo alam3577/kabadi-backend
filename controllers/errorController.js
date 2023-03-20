@@ -1,6 +1,7 @@
 const AppError = require('../utils/AppError');
 
 const ErrorProduction = (res, error) => {
+  console.log('ERROR IN PRODUCTION');
   if (error.isOperational) {
     res.status(error.statusCode).json({
       status: error.status,
@@ -33,6 +34,9 @@ const handleDuplicateFieldsDB = (error) => {
   const message = `Duplicate Input Fields: ${error.keyValue.name} please use Another value`;
   return new AppError(message, 400);
 };
+
+const handleTokenError = () =>
+  new AppError(`Invalid token. Please login again !`, 401);
 
 const handleValidationErrorDB = (error) => {
   console.log('Inside validation error', error.errors);
@@ -68,6 +72,7 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'ValidationError') {
       error = handleValidationErrorDB(error);
     }
+    if (error.name === 'JsonWebTokenError') error = handleTokenError(error);
 
     ErrorProduction(res, error);
   }

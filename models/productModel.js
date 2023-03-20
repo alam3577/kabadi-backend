@@ -15,10 +15,14 @@ const productSchema = new mongoose.Schema({
     required: [true, 'A product must have a price'],
     min: [0, 'A price must be not Zero'],
   },
-  // photo: {
-  //   type: String,
-  //   // required: [true, 'A product must have a photo'],
-  // },
+  photo: {
+    type: String,
+    required: [true, 'A product must have a photo'],
+  },
+  public_id: {
+    type: String,
+    required: [true, 'A product must have a public Id'],
+  },
 });
 
 const Product = mongoose.model('Product', productSchema);
