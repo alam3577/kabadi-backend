@@ -11,8 +11,16 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Phone Number is Required'],
     },
-    date: {
+    sellingType: {
       type: String,
+      required: [true, 'Select selling Type'],
+    },
+    location: {
+      type: String,
+      required: [true, 'Select Location'],
+    },
+    date: {
+      type: Date,
       required: [true, 'date is required'],
     },
     time: {
@@ -23,11 +31,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Address is required'],
     },
-    // user: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: User,
-    //   required: true,
-    // },
+    selectedSlot: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Slot',
+      required: true,
+    },
   },
   {
     timestamps: true,

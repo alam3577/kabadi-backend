@@ -10,6 +10,7 @@ const locationRoute = require('./routes/locationRoute');
 const cloudinaryRoute = require('./routes/cloudinaryRoutes');
 const userRoute = require('./routes/userRoute');
 const orderRoute = require('./routes/orderRoute');
+const slotRoute = require('./routes/slotRoute');
 
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/AppError');
@@ -39,6 +40,7 @@ app.use('/api/v1/kabadi', locationRoute);
 app.use('/api/v1/kabadi', cloudinaryRoute);
 app.use('/api/v1/kabadi', userRoute);
 app.use('/api/v1/kabadi', orderRoute);
+app.use('/api/v1/kabadi', slotRoute);
 
 // handle unhandled routes
 app.all('*', (req, res, next) => {

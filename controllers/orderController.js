@@ -29,3 +29,50 @@ exports.deleteOrders = catchAsync(async (req, res, next) => {
     message: 'Oder Deleted',
   });
 });
+
+// db.orders.aggregate([
+//   {
+//     $group: {
+//        _id: "$selectedSlot",
+//        count: { $count: { } }
+//     }
+//   }
+//   ]);
+
+// db.orders.aggregate([
+//   {
+//     $group: {
+//       _id: "$selectedSlot" ,
+//        count: { $sum: 1 }
+//     }
+//   },
+//   {
+//     $project:
+//            {
+//              count: 1,
+//              isValid:
+//                {
+//                  $cond: { if: { $lte: [ "$count", 3 ] }, then: true, else: false }
+//                }
+//     }
+//   },
+//   {
+//     $lookup:
+//          {
+//            from: "slots",
+//            let: { slot_id: "$_id" },
+//            pipeline: [
+//               { $match:
+//                  { $expr:
+//                     { $and:
+//                        [
+//                          { $eq: [ "$_id",  "$$slot_id" ] },
+//                        ]
+//                     }
+//                  }
+//               },
+//            ],
+//            as: "slots"
+//          }
+//   }
+// ])
