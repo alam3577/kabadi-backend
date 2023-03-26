@@ -31,6 +31,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Address is required'],
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     selectedSlot: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Slot',

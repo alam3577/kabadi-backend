@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const fast2sms = require('fast-two-sms');
 const User = require('../models/authModel');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
@@ -9,10 +11,22 @@ const signInToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+const sendOTP = async (phone, otp, next) => {
+  const options = {
+    authorization: process.env.F2F_API_KEY,
+    message: otp,
+    numbers: [phone],
+  };
+  const resData = await fast2sms.sendMessage(options);
+  if (!resData) {
+    return next(new AppError(`Error In sending OTP, Please try again`, 400));
+  }
+  return resData.return;
+};
+
+// TO DO
 const createSendToken = (user, statusCode, res) => {
-  console.log({ user, statusCode });
   const token = signInToken(user._id);
-  console.log({ token });
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -34,45 +48,93 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-// exports.singnup = catchAsync(async (req, res, next) => {
-//   const { name, phone, email, password, confirmPassword } = req.body;
-//   if (!phone || !password || !name || !confirmPassword) {
-//     return next(new AppError('Some fields are missing', 400));
-//   }
-//   const otp = Math.floor(100000 + Math.random() * 900000)
-//     .toString()
-//     .slice(0, 4);
+exports.singnup = catchAsync(async (req, res, next) => {
+  const { name, phone, password, confirmPassword } = req.body;
+  if (!phone || !password || !name || !confirmPassword) {
+    return next(new AppError('Some fields are missing', 400));
+  }
+  const userExist = await User.findOne({ phone });
 
-//   const user = await User.create({
-//     name,
-//     email,
-//     phone,
-//     otp,
-//     password,
-//     confirmPassword,
-//   });
-//   console.log({ user });
-//   if (!user) {
-//     return next(new AppError('Email or password is wrong', 404));
-//   }
-//   res.status(200).send('OTP sent!');
-//   createSendToken(user, 200, res);
-// });
+  if (userExist && userExist.isActive) {
+    return next(new AppError('User exist, Please Login', 400));
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000)
+    .toString()
+    .slice(0, 4);
+
+  const otpExpires = Date.now() + 5 * 60 * 1000;
+
+  const isOtpSent = await sendOTP(phone, otp, next);
+  if (!isOtpSent) {
+    return next(new AppError(`Error In sending OTP, Please try again`, 400));
+  }
+
+  if (userExist && !userExist.isActive) {
+    userExist.otp = otp;
+    userExist.OTPExpires = otpExpires;
+    await userExist.save({ validateBeforeSave: false });
+  } else {
+    const user = await User.create({
+      name,
+      phone,
+      otp,
+      OTPExpires: otpExpires,
+      password,
+      confirmPassword,
+    });
+
+    if (!user) {
+      return next(new AppError('Email or password is wrong', 404));
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP Sent',
+  });
+  // createSendToken(user, 200, res);
+});
+
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  const { phone, otp } = req.body;
+  const user = await User.findOne({ phone, otp });
+
+  if (!user) {
+    return next(new AppError(`Invalid OTP`, 400));
+  }
+
+  if (user.OTPExpires < Date.now()) {
+    return next(new AppError(`OTP Expires`, 400));
+  }
+
+  // Update user status to verified
+  user.isActive = true;
+  user.otp = undefined;
+  user.OTPExpires = undefined;
+  await user.save({
+    validateBeforeSave: false,
+  });
+
+  createSendToken(user, 200, res);
+});
 
 exports.login = catchAsync(async (req, res, next) => {
   //1.check email and password
   //2.check if user is exist and compare password.
   //3.if everything is ok send token
-  const { email, password } = req.body;
-  console.log({ email, password });
-  if (!email || !password) {
+  const { phone, password } = req.body;
+  if (!phone || !password) {
     return next(new AppError('Some fields are missing', 400));
   }
-  const user = await User.findOne({ email });
-  console.log({ user });
+  const user = await User.findOne({ phone });
 
-  if (!user || !(user.password === password)) {
-    return next(new AppError('Email or password is wrong', 401));
+  if (!user || !user.isActive) {
+    return next(new AppError('User not registered', 401));
+  }
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Phone or password is wrong', 401));
   }
   createSendToken(user, 200, res);
 });
@@ -126,68 +188,91 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 //authorization
-// exports.restrictTo =
-//   (...roles) =>
-//   (req, res, next) => {
-//     if (!roles.includes(req.user.role)) {
-//       return next(
-//         new AppError('you are not authorized to perform this operation', 403)
-//       );
-//     }
-//     next();
-//   };
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('you are not authorized to perform this operation', 403)
+      );
+    }
+    next();
+  };
 
-// const express = require('express');
-// const router = express.Router();
-// const User = require('../models/user');
-// const axios = require('axios');
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const { phone } = req.body;
+  const user = await User.findOne({ phone });
+  const otp = Math.floor(100000 + Math.random() * 900000)
+    .toString()
+    .slice(0, 4);
 
-// router.post('/signup', async (req, res) => {
-//   const { name, mobile, password } = req.body;
+  if (!user || !user.isActive) {
+    return next(new AppError('User not Found, please Signup', 404));
+  }
+  const isOtpSent = await sendOTP(phone, otp, next);
+  if (!isOtpSent) {
+    return next(new AppError(`Error In sending OTP, Please try again`, 400));
+  }
+  user.otp = otp;
+  user.OTPExpires = Date.now() + 5 * 60 * 1000;
+  user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP Sent',
+  });
+});
 
-//   try {
-//     // Generate OTP
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+exports.verifyResetPasswordOTP = catchAsync(async (req, res, next) => {
+  const { phone, otp } = req.body;
+  const user = await User.findOne({ phone, otp });
+  if (!user || !user.isActive) {
+    return next(new AppError(`Invalid OTP`, 400));
+  }
 
-//     // Save user data and OTP to the database
-//     const user = new User({ name, mobile, password, otp });
-//     await user.save();
+  if (user.OTPExpires < Date.now()) {
+    return next(new AppError(`OTP Expires`, 400));
+  }
 
-//     // Send OTP to the user's mobile number
-//     const url = `https://api.msg91.com/api/v5/otp?authkey=${process.env.MSG91_AUTH_KEY}&mobile=${mobile}&message=Your OTP is ${otp}&sender=${process.env.MSG91_SENDER_ID}`;
+  // Update user status to verified
+  await user.save({
+    validateBeforeSave: false,
+  });
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP verified',
+  });
+});
 
-//     const response = await axios.post(url);
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const { phone, otp, password, confirmPassword } = req.body;
+  const user = await User.findOne({ phone, otp });
 
-//     if (response.data.type === 'error') {
-//       throw new Error(response.data.message);
-//     }
+  if (!user || !user.isActive) {
+    return next(new AppError(`Invalid OTP`, 400));
+  }
 
-//     res.status(200).send('OTP sent!');
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Server error');
-//   }
-// });
+  if (user.OTPExpires < Date.now()) {
+    return next(new AppError(`OTP Expires`, 400));
+  }
 
-// module.exports = router;
-// router.post('/verify-otp', async (req, res) => {
-//   const { mobile, otp } = req.body;
+  user.password = password;
+  user.confirmPassword = confirmPassword;
+  user.otp = undefined;
+  user.OTPExpires = undefined;
 
-//   try {
-//     // Find user by mobile number and OTP
-//     const user = await User.findOne({ mobile, otp });
+  await user.save();
+  createSendToken(user, 200, res);
+});
 
-//     if (!user) {
-//       return res.status(400).send('Invalid OTP');
-//     }
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
 
-//     // Update user status to verified
-//     user.verified = true;
-//     await user.save();
+  if (!user.correctPassword(req.body.currentPassword, user.password)) {
+    return next(new AppError('your current password is wrong', 401));
+  }
 
-//     res.status(200).send('OTP verified!');
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Server error');
-//   }
-// });
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  await user.save();
+  createSendToken(user, 200, res);
+});

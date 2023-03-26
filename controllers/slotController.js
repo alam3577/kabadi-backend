@@ -6,7 +6,6 @@ const { filterBodyObj } = require('../utils/helper');
 
 exports.getSlots = catchAsync(async (req, res, next) => {
   const allAvailableSlots = await Slot.find({});
-  console.log({ allAvailableSlots });
   res.status(200).json({
     status: 'success',
     data: {
@@ -58,7 +57,6 @@ exports.getSlotsForUser = catchAsync(async (req, res, next) => {
     },
   ]);
 
-  // console.log({ slots });
   res.status(200).json({
     status: 'success',
     data: {

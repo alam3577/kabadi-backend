@@ -13,7 +13,41 @@ exports.addOrders = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllOrders = catchAsync(async (req, res, next) => {
-  const allOrders = await Order.find({});
+  // const allOrders = await Order.find({}).populate('user', 'name phone');
+  const allOrders = await Order.aggregate([
+    {
+      $lookup: {
+        from: 'users',
+        let: { user_id: '$user' },
+        pipeline: [
+          { $match: { $expr: { $and: [{ $eq: ['$_id', '$$user_id'] }] } } },
+        ],
+        as: 'order',
+      },
+    },
+    {
+      $unwind: {
+        path: '$order',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        registeredName: '$order.name',
+        registeredPhone: '$order.phone',
+      },
+    },
+    {
+      $project: {
+        order: 0,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
   res.status(200).json({
     status: 'success',
     data: {
@@ -27,6 +61,29 @@ exports.deleteOrders = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     message: 'Oder Deleted',
+  });
+});
+
+exports.getMyOrders = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+  const order = await Order.aggregate([
+    {
+      $match: {
+        $expr: { $eq: ['$user', userId] },
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      order,
+    },
   });
 });
 

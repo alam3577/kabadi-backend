@@ -5,6 +5,5 @@ exports.filterBodyObj = (obj, ...allowedFields) => {
       objElem[el] = obj[el];
     }
   });
-  console.log({ objElem });
   return objElem;
 };

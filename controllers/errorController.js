@@ -11,7 +11,7 @@ const ErrorProduction = (res, error) => {
     console.log(error);
     res.status(500).json({
       status: 'error',
-      message: 'Something gone very wrong',
+      message: 'Something gone wrong',
     });
   }
 };

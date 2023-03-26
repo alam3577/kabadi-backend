@@ -16,7 +16,6 @@ exports.uploadProductImage = catchAsync(async (req, res) => {
     public_id: Date.now(),
     resource_type: 'auto',
   });
-  console.log({ result });
   res.json({
     public_id: result.public_id,
     url: result.url,
@@ -63,7 +62,6 @@ exports.addProduct = catchAsync(async (req, res, next) => {
     photo,
     public_id,
   });
-  console.log({ newProduct });
   res.status(201).json({
     status: 'success',
     data: {
@@ -112,60 +110,3 @@ exports.deleteAllProduct = catchAsync(async (req, res, next) => {
     message: 'All products deleted',
   });
 });
-
-// const result = cloudinary.uploader.upload();
-// const multer = require('multer');
-// const path = require('path');
-// const sharp = require('sharp');
-// const multerStorage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     const newPath = `${path.join(__dirname, '../public/img/products/')}`;
-//     console.log({ newPath });
-//     cb(null, newPath);
-//   },
-//   filename: function (req, file, cb) {
-//     console.log(file);
-//     // const ext = file.mimetype.split('/')[1];
-//     cb(null, `product-${file.originalname}`);
-//   },
-// });
-
-// In this way the image will stored as buffer And so that buffer is then available at
-// req.file.buffer
-// const multerStorage = multer.memoryStorage();
-
-// const multerFilter = (req, file, cb) => {
-//   if (file.mimetype.startsWith('image')) {
-//     cb(null, true);
-//   } else {
-//     cb(new AppError('not an image please upload only images', 400), false);
-//   }
-// };
-
-// const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
-
-// exports.productPhoto = upload.single('photo');
-
-// exports.resizeProductPhoto = async (req, res, next) => {
-//   if (!req.file) return next();
-//   console.log({ file: req.file });
-//   const filePath = `${path.join(
-//     __dirname,
-//     `../public/img/products/${req.file.originalname}`
-//   )}`;
-//   console.log({ filePath });
-//   await sharp(req.file.buffer)
-//     .resize(500, 500)
-//     .toFormat('png')
-//     .png({ palette: true })
-//     .toFile(filePath);
-
-//   const response = await cloudinary.uploader.upload(filePath, {
-//     resource_type: 'image',
-//   });
-
-//   req.file.photo = response.url;
-//   req.file.photo_id = response.public_id;
-//   console.log({ response });
-//   next();
-// };

@@ -4,6 +4,7 @@ require('dotenv').config({
 const express = require('express');
 const cors = require('cors');
 // eslint-disable-next-line import/no-extraneous-dependencies
+const fast2sms = require('fast-two-sms');
 const cookieParser = require('cookie-parser');
 const productRoute = require('./routes/productRoute');
 const locationRoute = require('./routes/locationRoute');
@@ -42,6 +43,18 @@ app.use('/api/v1/kabadi', userRoute);
 app.use('/api/v1/kabadi', orderRoute);
 app.use('/api/v1/kabadi', slotRoute);
 
+app.post('/send-message', async (req, res) => {
+  const options = {
+    authorization: process.env.F2F_API_KEY,
+    message: req.body.message,
+    numbers: [req.body.number],
+  };
+  const resData = await fast2sms.sendMessage(options);
+  res.status(200).json({
+    data: resData,
+  });
+});
+
 // handle unhandled routes
 app.all('*', (req, res, next) => {
   next(new AppError(`cant find ${req.originalUrl} on this server`, 404));
@@ -51,6 +64,7 @@ app.all('*', (req, res, next) => {
 app.use(globalErrorHandler);
 
 console.log({ en: process.env.NODE_ENV });
+
 // assign the server
 app.listen(port, () => {
   console.log('server is running to the port of', port);
