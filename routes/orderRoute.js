@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 const {
   getAllOrders,
   deleteOrders,
@@ -8,9 +8,12 @@ const {
 } = require('../controllers/orderController');
 const router = express.Router();
 
-router.route('/order').get(getAllOrders).post(addOrders);
+router
+  .route('/order')
+  .get(protect, restrictTo('admin'), getAllOrders)
+  .post(protect, addOrders);
 
-router.delete('/order/:id', protect, deleteOrders);
+router.delete('/order/:id', protect, restrictTo('admin'), deleteOrders);
 router.get('/order/get-my-order', protect, getMyOrders);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 const {
   getSlots,
   addSlot,
@@ -11,12 +11,12 @@ const {
 
 const router = express.Router();
 
-router.route('/slot').get(getSlots).post(protect, addSlot);
+router.route('/slot').get(getSlots).post(protect, restrictTo('admin'), addSlot);
 router.get('/user-slot/:date', getSlotsForUser);
 router
   .route('/slot/:id')
-  .get(protect, getSlot)
-  .patch(protect, updateSlot)
-  .delete(protect, deleteSlot);
+  .get(protect, restrictTo('admin'), getSlot)
+  .patch(protect, restrictTo('admin'), updateSlot)
+  .delete(protect, restrictTo('admin'), deleteSlot);
 
 module.exports = router;

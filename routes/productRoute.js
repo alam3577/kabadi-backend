@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 const {
   getAllProducts,
   getProduct,
@@ -13,13 +13,13 @@ const router = express.Router();
 router
   .route('/product')
   .get(getAllProducts)
-  .post(protect, addProduct)
-  .delete(protect, deleteAllProduct);
+  .post(protect, restrictTo('admin'), addProduct)
+  .delete(protect, restrictTo('admin'), deleteAllProduct);
 
 router
   .route('/product/:id')
-  .get(protect, getProduct)
-  .patch(protect, updateProduct)
-  .delete(protect, deleteProduct);
+  .get(protect, restrictTo('admin'), getProduct)
+  .patch(protect, restrictTo('admin'), updateProduct)
+  .delete(protect, restrictTo('admin'), deleteProduct);
 
 module.exports = router;

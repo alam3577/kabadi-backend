@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 const {
   uploadProductImage,
   removeProductImage,
@@ -7,7 +7,7 @@ const {
 
 const router = express.Router();
 
-router.post('/upload-image', protect, uploadProductImage);
-router.post('/remove-image', protect, removeProductImage);
+router.post('/upload-image', protect, restrictTo('admin'), uploadProductImage);
+router.post('/remove-image', protect, restrictTo('admin'), removeProductImage);
 
 module.exports = router;

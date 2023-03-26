@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect } = require('../controllers/authController');
+const { protect, restrictTo } = require('../controllers/authController');
 const {
   getAllAvailableLocation,
   addLocation,
@@ -11,11 +11,11 @@ const router = express.Router();
 router
   .route('/location')
   .get(getAllAvailableLocation)
-  .post(protect, addLocation);
+  .post(protect, restrictTo('admin'), addLocation);
 
 router
   .route('/location/:id')
-  .delete(protect, deleteLocation)
-  .patch(protect, updateLocation);
+  .delete(protect, restrictTo('admin'), deleteLocation)
+  .patch(protect, restrictTo('admin'), updateLocation);
 
 module.exports = router;

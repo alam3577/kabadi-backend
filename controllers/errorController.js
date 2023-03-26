@@ -39,8 +39,6 @@ const handleTokenError = () =>
   new AppError(`Invalid token. Please login again !`, 401);
 
 const handleValidationErrorDB = (error) => {
-  console.log('Inside validation error', error.errors);
-  // error.errors.map((err) => console.log({ err }));
   const value = Object.values(error.errors)
     .map((err) => err.message)
     .join('. ');
