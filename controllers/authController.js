@@ -124,11 +124,11 @@ exports.login = catchAsync(async (req, res, next) => {
   //2.check if user is exist and compare password.
   //3.if everything is ok send token
   const { phone, password } = req.body;
+  console.log({ phone, password });
   if (!phone || !password) {
     return next(new AppError('Some fields are missing', 400));
   }
   const user = await User.findOne({ phone });
-
   if (!user || !user.isActive) {
     return next(new AppError('User not registered', 401));
   }
@@ -275,4 +275,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.confirmPassword = req.body.confirmPassword;
   await user.save();
   createSendToken(user, 200, res);
+});
+
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find({});
+  res.status(200).json({
+    status: 'success',
+    users,
+  });
 });

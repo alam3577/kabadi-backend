@@ -52,9 +52,11 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') ErrorDevelopment(err, res);
 
   if (process.env.NODE_ENV.trim() === 'production') {
+    console.log({ err: err.message });
     // eslint-disable-next-line node/no-unsupported-features/es-syntax
     let error = { ...err };
     error.name = err.name;
+    error.message = err.message;
 
     // for invalid ids
     if (error.name === 'CastError') {

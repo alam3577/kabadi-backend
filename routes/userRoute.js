@@ -9,6 +9,8 @@ const {
   updatePassword,
   forgotPassword,
   verifyResetPasswordOTP,
+  getAllUsers,
+  restrictTo,
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -21,5 +23,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-password-otp', verifyResetPasswordOTP);
 router.post('/reset-password', resetPassword);
 router.post('/update-password', protect, updatePassword);
+router.post('/get-all-users', protect, restrictTo('admin'), getAllUsers);
 
 module.exports = router;

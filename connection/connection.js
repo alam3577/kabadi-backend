@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
-const localDB = process.env.DB_LOCAL;
+// const localDB = process.env.DB_LOCAL;
+const cloudDB = process.env.DB_CLOUD;
 
 mongoose.set('strictQuery', false);
 mongoose
-  .connect(localDB, {
+  .connect(cloudDB, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
