@@ -5,7 +5,16 @@ const catchAsync = require('../utils/catchAsync');
 const { filterBodyObj } = require('../utils/helper');
 
 exports.getSlots = catchAsync(async (req, res, next) => {
-  const allAvailableSlots = await Slot.find({});
+  const allAvailableSlots = await Slot.aggregate([
+    {
+      $sort: {
+        startTime: 1,
+        startTimeMeridiem: 1,
+        endTime: 1,
+        endTimeMeridiem: 1,
+      },
+    },
+  ]);
   res.status(200).json({
     status: 'success',
     data: {
@@ -53,6 +62,14 @@ exports.getSlotsForUser = catchAsync(async (req, res, next) => {
     {
       $project: {
         order: 0,
+      },
+    },
+    {
+      $sort: {
+        startTime: 1,
+        startTimeMeridiem: 1,
+        endTime: 1,
+        endTimeMeridiem: 1,
       },
     },
   ]);

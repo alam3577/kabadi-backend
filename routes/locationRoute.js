@@ -11,11 +11,11 @@ const router = express.Router();
 router
   .route('/location')
   .get(getAllAvailableLocation)
-  .post(protect, restrictTo('admin'), addLocation);
+  .post(protect, restrictTo('admin', 'super-admin'), addLocation);
 
 router
   .route('/location/:id')
-  .delete(protect, restrictTo('admin'), deleteLocation)
-  .patch(protect, restrictTo('admin'), updateLocation);
+  .delete(protect, restrictTo('admin', 'super-admin'), deleteLocation)
+  .patch(protect, restrictTo('admin', 'super-admin'), updateLocation);
 
 module.exports = router;

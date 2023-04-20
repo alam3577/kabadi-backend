@@ -10,10 +10,10 @@ const router = express.Router();
 
 router
   .route('/order')
-  .get(protect, restrictTo('admin'), getAllOrders)
+  .get(protect, restrictTo('admin', 'super-admin'), getAllOrders)
   .post(protect, addOrders);
 
-router.delete('/order/:id', protect, restrictTo('admin'), deleteOrders);
+router.delete('/order/:id', protect, restrictTo('super-admin'), deleteOrders);
 router.get('/order/get-my-order', protect, getMyOrders);
 
 module.exports = router;

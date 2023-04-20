@@ -7,7 +7,17 @@ const {
 
 const router = express.Router();
 
-router.post('/upload-image', protect, restrictTo('admin'), uploadProductImage);
-router.post('/remove-image', protect, restrictTo('admin'), removeProductImage);
+router.post(
+  '/upload-image',
+  protect,
+  restrictTo('super-admin'),
+  uploadProductImage
+);
+router.post(
+  '/remove-image',
+  protect,
+  restrictTo('super-admin'),
+  removeProductImage
+);
 
 module.exports = router;
